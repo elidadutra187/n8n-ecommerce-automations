@@ -1,0 +1,78 @@
+{
+  "name": "WhatsApp Order Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "order-webhook",
+        "responseMode": "onReceived",
+        "responseData": "allEntries"
+      },
+      "id": "webhook-trigger",
+      "name": "Order Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse incoming order data\nconst order = $input.first().json;\n\n// Extract relevant fields\nconst customerName = order.customer?.name || 'Cliente';\nconst orderNumber = order.number || order.id || 'N/A';\nconst total = order.total || '0.00';\nconst date = new Date().toLocaleDateString('pt-BR');\nconst status = order.status_label || 'Novo';\nconst seller = order.seller?.name || 'Loja';\n\n// Format for WhatsApp template\nreturn [{\n  json: {\n    customerName,\n    orderNumber: String(orderNumber),\n    total: String(total),\n    date,\n    status,\n    seller,\n    rawOrder: order\n  }\n}];"
+      },
+      "id": "parse-order",
+      "name": "Parse Order Data",
+      "type": "n8n-nodes-base.code",
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v23.0/{{$credentials.phoneNumberId}}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"5511999999999\",\n  \"type\": \"template\",\n  \"template\": {\n    \"name\": \"order_notification\",\n    \"language\": { \"code\": \"pt_BR\" },\n    \"components\": [{\n      \"type\": \"body\",\n      \"parameters\": [\n        { \"type\": \"text\", \"text\": \"{{ $json.customerName }}\" },\n        { \"type\": \"text\", \"text\": \"{{ $json.orderNumber }}\" },\n        { \"type\": \"text\", \"text\": \"{{ $json.total }}\" },\n        { \"type\": \"text\", \"text\": \"{{ $json.date }}\" },\n        { \"type\": \"text\", \"text\": \"{{ $json.status }}\" },\n        { \"type\": \"text\", \"text\": \"{{ $json.seller }}\" }\n      ]\n    }]\n  }\n}"
+      },
+      "id": "send-whatsapp",
+      "name": "Send WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "YOUR_SHEET_ID", "mode": "id" },
+        "sheetName": "Logs",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.toISO() }}",
+            "Order": "={{ $json.orderNumber }}",
+            "Customer": "={{ $json.customerName }}",
+            "Total": "={{ $json.total }}",
+            "Status": "=Sent"
+          }
+        }
+      },
+      "id": "log-sheets",
+      "name": "Log to Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Order Webhook": {
+      "main": [[{ "node": "Parse Order Data", "type": "main", "index": 0 }]]
+    },
+    "Parse Order Data": {
+      "main": [[{ "node": "Send WhatsApp", "type": "main", "index": 0 }]]
+    },
+    "Send WhatsApp": {
+      "main": [[{ "node": "Log to Sheets", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
+  "staticData": null,
+  "tags": ["whatsapp", "orders", "notifications"]
+}
