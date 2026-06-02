@@ -1,8 +1,22 @@
-<p align="center">
+<div align="center">
   <strong>φ</strong>
-</p>
+  <h1>n8n E-commerce Automations</h1>
+  <p><em>Production-ready n8n workflow templates for e-commerce operations</em></p>
+  <p>
+    <a href="https://github.com/elidadutra187/n8n-ecommerce-automations">Repository</a> ·
+    <a href="https://github.com/elidadutra187">GitHub Profile</a>
+  </p>
+</div>
 
-# n8n E-commerce Automations
+
+## Positioning
+
+This repository is part of the `φ` portfolio by [Élida Dutra](https://github.com/elidadutra187), focused on practical systems for e-commerce, automation, analytics, content generation and growth operations.
+
+**Repository:** [elidadutra187/n8n-ecommerce-automations](https://github.com/elidadutra187/n8n-ecommerce-automations)  
+**GitHub:** [https://github.com/elidadutra187](https://github.com/elidadutra187)  
+**Purpose:** Production-ready n8n workflow templates for e-commerce operations
+
 
 > Production-ready n8n workflow templates for e-commerce operations
 
@@ -196,3 +210,10 @@ MIT
   <strong>φ</strong><br>
   <em>Building intelligent systems at the intersection of marketing, data, and AI</em>
 </p>
+
+<div align="center">
+  <strong>φ</strong>
+  <br />
+  <sub>Built and maintained by <a href="https://github.com/elidadutra187">Élida Dutra</a>.</sub>
+</div>
+
